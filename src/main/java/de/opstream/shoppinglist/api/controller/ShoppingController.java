@@ -5,6 +5,7 @@ import de.opstream.shoppinglist.api.service.ShoppingService;
 import de.opstream.shoppinglist.api.entity.ShoppingItemEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,6 +30,15 @@ public class ShoppingController {
         this.shoppingService = shoppingService;
     }
 
+    @Operation(summary = "Get the full shopping list")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "The shopping list will be returned.", content = {
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            array = @ArraySchema(schema = @Schema(implementation = ShoppingItemEntity.class))
+                    )
+            })
+    })
     @GetMapping
     public List<ShoppingItemEntity> getShoppingItems() {
         log.debug("Get all shopping items.");
