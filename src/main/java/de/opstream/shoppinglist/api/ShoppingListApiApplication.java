@@ -1,4 +1,4 @@
-package de.opstream.shoppinglistapi;
+package de.opstream.shoppinglist.api;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

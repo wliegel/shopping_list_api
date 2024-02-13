@@ -1,0 +1,19 @@
+spring:
+  h2.console.enabled: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+#    url: jdbc:h2:file:./src/main/resources/data/shoppinglist;AUTO_SERVER=true
+    driver-class-name: org.h2.Driver
+#    username: sa
+#    password: password
+  sql.init.mode: always
+  sql.init.platform: h2
+  jpa:
+    hibernate:
+      ddl-auto: none
+    generate-ddl: false
+    show-sql: true
+
+logging:
+  level:
+    de.opstream.shoppinglist.api: DEBUG
