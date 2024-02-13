@@ -5,6 +5,7 @@ import de.opstream.shoppinglist.api.jpa.ShoppingRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ShoppingService {
@@ -16,5 +17,9 @@ public class ShoppingService {
 
     public List<ShoppingItemEntity> findAll() {
         return this.shoppingRepository.findAll();
+    }
+
+    public Optional<ShoppingItemEntity> findById(long id) {
+        return this.shoppingRepository.findById(id);
     }
 }
