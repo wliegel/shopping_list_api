@@ -1,8 +1,8 @@
 package de.opstream.shoppinglist.api.controller;
 
+import de.opstream.shoppinglist.api.entity.ShoppingItemEntity;
 import de.opstream.shoppinglist.api.exception.ShoppingItemNotFoundException;
 import de.opstream.shoppinglist.api.service.ShoppingService;
-import de.opstream.shoppinglist.api.entity.ShoppingItemEntity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -10,12 +10,11 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -30,7 +29,12 @@ public class ShoppingController {
         this.shoppingService = shoppingService;
     }
 
-    @Operation(summary = "Get the full shopping list")
+    /**
+     * Get all Shopping items from Database
+     * GET Method
+     * @return a list of Shopping Items
+     */
+    @Operation(summary = "Get the shopping list.", description = "Get the full shopping list from the database.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "The shopping list will be returned.", content = {
                     @Content(
@@ -39,14 +43,20 @@ public class ShoppingController {
                     )
             })
     })
-    @GetMapping
-    public List<ShoppingItemEntity> getShoppingItems() {
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<ShoppingItemEntity>> getShoppingItems() {
         log.debug("Get all shopping items.");
-
-        return shoppingService.findAll();
+        List<ShoppingItemEntity> shoppingItemEntities = shoppingService.findAll();
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(shoppingItemEntities);
     }
 
-    @Operation(summary = "Get a shopping item by its id")
+    /**
+     * Get a single Shopping Item from Database
+     * GET Method
+     * @param id ID of the Shopping Item
+     * @return the Shopping Item for the requested ID
+     */
+    @Operation(summary = "Get a shopping item by its id.", description = "Retrieve a shopping item identified by its id.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Found the item.", content = {
                     @Content(
@@ -57,9 +67,65 @@ public class ShoppingController {
             @ApiResponse(responseCode = "400", description = "Invalid id supplied.", content = @Content),
             @ApiResponse(responseCode = "404", description = "Shopping item not found.", content = @Content)
     })
-    @GetMapping("/{id}")
-    public ShoppingItemEntity getShoppingItem(@Parameter(description = "id of the shopping item to be returned.") @PathVariable long id) {
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ShoppingItemEntity> getShoppingItem(@Parameter(description = "id of the shopping item to be returned.", required = true) @PathVariable Long id) {
         log.debug("Get a shopping item for id {}", id);
-        return shoppingService.findById(id).orElseThrow(ShoppingItemNotFoundException::new);
+        ShoppingItemEntity shoppingItemEntity = shoppingService.findById(id).orElseThrow(ShoppingItemNotFoundException::new);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(shoppingItemEntity);
+    }
+
+    /**
+     * Create a new Shopping Item
+     * POST Method
+     * @param shoppingItemEntity the new Shopping Item data
+     * @return the created Shopping Item
+     */
+    @Operation(summary = "Create a new shopping item.", description = "Creates a new shopping item in the database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully created the shopping item.", content = {
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ShoppingItemEntity.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "400", description = "Invalid data supplied.", content = @Content)
+    })
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ShoppingItemEntity> createNewShoppingItem(@Valid @RequestBody ShoppingItemEntity shoppingItemEntity) {
+        log.debug("Create a new Shopping Item. Name: {}, Category: {}, Description: {}",
+                shoppingItemEntity.getName(), shoppingItemEntity.getCategory(), shoppingItemEntity.getDescription());
+        ShoppingItemEntity newShoppingItem = shoppingService.createShoppingItem(shoppingItemEntity);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(newShoppingItem);
+    }
+
+    /**
+     * Update an existing Shopping Item
+     * PUT Method
+     * @param id the ID of the Shopping Item that should be updated.
+     * @param shoppingItemEntity The new Shopping Item data.
+     * @return the updated Shopping Item
+     */
+    @Operation(summary = "Update a shopping item.", description = "Updates an existing shopping item in the database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully updated the shopping item.", content = {
+                    @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ShoppingItemEntity.class)
+                    )
+            }),
+            @ApiResponse(responseCode = "400", description = "Invalid data supplied.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Shopping item not found.", content = @Content)
+    })
+    @PutMapping(path = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ShoppingItemEntity> updateShoppingItem(
+            @Parameter(description = "id of the shopping item to be returned.", required = true) @PathVariable Long id,
+            @Valid @RequestBody ShoppingItemEntity shoppingItemEntity) {
+        log.debug("Update an existing Shopping Item with ID {}. Name: {}, Category: {}, Description: {}",
+                shoppingItemEntity.getId(),
+                shoppingItemEntity.getName(),
+                shoppingItemEntity.getCategory(),
+                shoppingItemEntity.getDescription());
+        ShoppingItemEntity newShoppingItem = shoppingService.updateShoppingItem(id, shoppingItemEntity);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(newShoppingItem);
     }
 }
