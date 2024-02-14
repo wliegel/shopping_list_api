@@ -1,7 +1,6 @@
 package de.opstream.shoppinglist.api.controller;
 
 import de.opstream.shoppinglist.api.entity.ShoppingItemEntity;
-import de.opstream.shoppinglist.api.exception.ShoppingItemNotFoundException;
 import de.opstream.shoppinglist.api.service.ShoppingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -70,7 +69,7 @@ public class ShoppingController {
     @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ShoppingItemEntity> getShoppingItem(@Parameter(description = "id of the shopping item to be returned.", required = true) @PathVariable Long id) {
         log.debug("Get a shopping item for id {}", id);
-        ShoppingItemEntity shoppingItemEntity = shoppingService.findById(id).orElseThrow(ShoppingItemNotFoundException::new);
+        ShoppingItemEntity shoppingItemEntity = shoppingService.findById(id);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(shoppingItemEntity);
     }
 
@@ -127,5 +126,24 @@ public class ShoppingController {
                 shoppingItemEntity.getDescription());
         ShoppingItemEntity newShoppingItem = shoppingService.updateShoppingItem(id, shoppingItemEntity);
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(newShoppingItem);
+    }
+
+
+    /**
+     * Delete an existing Shopping Item
+     * DELETE Method
+     * @param id the ID of the Shopping Item that should be updated.
+     */
+    @Operation(summary = "Delete a shopping item.", description = "Deletes an existing shopping item from the database.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Successfully deleted the shopping item.", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Shopping item not found.", content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteShoppingItem(
+            @Parameter(description = "id of the shopping item to be deleted", required = true) @PathVariable("id") Long id) {
+        log.debug("delete an existing shopping Item with ID {}.", id);
+        this.shoppingService.deleteShoppingItem(id);
+        return ResponseEntity.noContent().build();
     }
 }

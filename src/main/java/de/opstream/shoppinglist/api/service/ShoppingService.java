@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ShoppingService {
@@ -21,8 +20,8 @@ public class ShoppingService {
         return this.shoppingRepository.findAll();
     }
 
-    public Optional<ShoppingItemEntity> findById(long id) {
-        return this.shoppingRepository.findById(id);
+    public ShoppingItemEntity findById(long id) {
+        return this.shoppingRepository.findById(id).orElseThrow(ShoppingItemNotFoundException::new);
     }
 
     public ShoppingItemEntity createShoppingItem(ShoppingItemEntity shoppingItemEntity) {
@@ -40,5 +39,11 @@ public class ShoppingService {
         shoppingItem.setDescription(shoppingItemEntity.getDescription());
         shoppingItem.setActive(shoppingItemEntity.isActive());
         return this.shoppingRepository.saveAndFlush(shoppingItem);
+    }
+
+    public void deleteShoppingItem(Long id) {
+        Assert.isTrue(id != null && id > 0, "Shopping Item ID must be set.");
+        ShoppingItemEntity shoppingItem = this.shoppingRepository.findById(id).orElseThrow(ShoppingItemNotFoundException::new);
+        this.shoppingRepository.delete(shoppingItem);
     }
 }
