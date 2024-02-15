@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  shopping-list-api:
+    image: shoppinglistapi:latest
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - shopping-list-db
+    networks:
+      - internalnet
+
+  shopping-list-db:
+    image: postgres:latest
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: shoppinglist
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: securePassword
+    ports:
+      - "5432:5432"
+    networks:
+      - internalnet
+
+networks:
+  internalnet:
+    driver: bridge

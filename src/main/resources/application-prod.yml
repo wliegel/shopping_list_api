@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://shopping-list-db:5432/shoppinglist
+    username: postgres
+    password: securePassword
+  sql.init.mode: never
+  sql.init.platform: postgres
+  jpa:
+    hibernate:
+      ddl-auto: none
+    generate-ddl: false
+    show-sql: true
+
+logging:
+  level:
+    de.opstream.shoppinglist.api: DEBUG
