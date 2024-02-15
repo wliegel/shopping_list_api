@@ -3,6 +3,7 @@ package de.opstream.shoppinglist.api.service;
 import de.opstream.shoppinglist.api.entity.ShoppingItemEntity;
 import de.opstream.shoppinglist.api.exception.ShoppingItemNotFoundException;
 import de.opstream.shoppinglist.api.jpa.ShoppingRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -17,7 +18,7 @@ public class ShoppingService {
     }
 
     public List<ShoppingItemEntity> findAll() {
-        return this.shoppingRepository.findAll();
+        return this.shoppingRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
     }
 
     public ShoppingItemEntity findById(long id) {
